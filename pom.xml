@@ -17,6 +17,11 @@
             <id>crast-repo</id>
             <url>http://maven.crast.us</url>
         </repository>
+        <repository>
+            <id>dakani</id>
+            <name>Dakani Nexus Repo</name>
+            <url>http://repo.dakanilabs.com/content/repositories/public</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -40,6 +45,11 @@
             <version>0.3</version>
             <type>jar</type>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>lib.PatPeter.SQLibrary</groupId>
+            <artifactId>SQLibrary</artifactId>
+            <version>LATEST</version>
         </dependency>
     </dependencies>
 
@@ -83,5 +93,5 @@
             </plugin>
         </plugins>
     </build>
-    
+
 </project>

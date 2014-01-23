@@ -1,10 +1,14 @@
 package com.ksanur.lightbikes.bikes;
 
+import com.ksanur.lightbikes.LightBikes;
 import net.minecraft.server.v1_7_R1.*;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftCreature;
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftEntity;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.lang.reflect.Field;
 
@@ -16,10 +20,12 @@ import java.lang.reflect.Field;
 public class Bike extends EntityCreature implements IAnimal {
     Direction currentDirection = Direction.NORTH;
     long lastTurned = 0;
+    long turnDelay = 500;
 
-    private float speed = 0.35F;
+    private float speed = 1.00F;
     private float acceleration = 0.0F;
-    private double jumpHeight = 0.5D;
+    private double jumpHeight = 0.8D;
+    private DyeColor color = DyeColor.BLUE;
 
     protected static Field jump = null;
 
@@ -31,6 +37,7 @@ public class Bike extends EntityCreature implements IAnimal {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
         //set health positive?
         //this.getBukkitEntity().setMaxHealth(20.0);
         //this.setHealth((float) 20.0);
@@ -64,13 +71,14 @@ public class Bike extends EntityCreature implements IAnimal {
 
         this.X = 1.0F;    // The custom entity will now automatically climb up 1 high blocks
 
+        speed += acceleration;
         //sideMot = ((EntityLiving) this.passenger).be * 0.5F;
-        forMot = 0.4F;//((EntityLiving) this.passenger).bf;
+        forMot = speed;//((EntityLiving) this.passenger).bf;
         //if going backwards
         /*if (forMot <= 0.0F) {
             forMot *= 0.25F;// Make backwards slower
         }*/
-        this.i(speed);    // Apply the speed multiplier
+        //this.i(speed);    // Apply the speed multiplier
         //apply motion to entity
         super.e(sideMot, forMot);
 
@@ -85,7 +93,7 @@ public class Bike extends EntityCreature implements IAnimal {
             }
         }
 
-        new Location(world.getWorld(), locX, locY, locZ).getBlock().setType(org.bukkit.Material.STAINED_GLASS_PANE);
+        createTrack();
     }
 
     public CraftCreature getBukkitEntity() {
@@ -124,9 +132,25 @@ public class Bike extends EntityCreature implements IAnimal {
         return currentDirection;
     }
 
+    public void setTrailColor(DyeColor color) {
+        this.color = color;
+    }
+
+    public DyeColor getTrailColor() {
+        return color;
+    }
+
+    public void setTurnDelay(long turnDelay) {
+        this.turnDelay = turnDelay;
+    }
+
+    public long getTurnDelay() {
+        return turnDelay;
+    }
+
     public void turnRight() {
         long time = System.currentTimeMillis();
-        if (time - lastTurned >= 500) {
+        if (time - lastTurned >= turnDelay) {
             ((EntityPlayer) this.passenger).getBukkitEntity().playSound(new Location(world.getWorld(), locX, locY, locZ), Sound.NOTE_PLING, 1.0f, 1.0f);
             lastTurned = time;
             currentDirection = Direction.getRightDirection(currentDirection);
@@ -135,7 +159,7 @@ public class Bike extends EntityCreature implements IAnimal {
 
     public void turnLeft() {
         long time = System.currentTimeMillis();
-        if (time - lastTurned >= 500) {
+        if (time - lastTurned >= turnDelay) {
             ((EntityPlayer) this.passenger).getBukkitEntity().playSound(new Location(world.getWorld(), locX, locY, locZ), Sound.NOTE_PLING, 1.0f, 1.0f);
             lastTurned = time;
             currentDirection = Direction.getLeftDirection(currentDirection);
@@ -144,6 +168,17 @@ public class Bike extends EntityCreature implements IAnimal {
 
     public void jump() {
         this.motY = jumpHeight;  // Used all the time in NMS for entity jumping
+    }
+
+    public void createTrack() {
+        final Location track = new Location(world.getWorld(), locX, locY, locZ);
+        new BukkitRunnable() {
+            public void run() {
+                Block block = track.getBlock();
+                block.setType(org.bukkit.Material.STAINED_GLASS_PANE);
+                block.setData(color.getWoolData());
+            }
+        }.runTaskLater(LightBikes.getInstance(), 5L);
     }
 
     @Override

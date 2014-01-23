@@ -1,11 +1,10 @@
 package com.ksanur.lightbikes;
 
-import com.ksanur.lightbikes.bikes.Bike;
-import com.ksanur.lightbikes.bikes.Direction;
-import mondocommand.CallInfo;
+import lib.PatPeter.SQLibrary.Database;
+import lib.PatPeter.SQLibrary.Mongo;
+import lib.PatPeter.SQLibrary.MySQL;
+import lib.PatPeter.SQLibrary.SQLite;
 import mondocommand.MondoCommand;
-import mondocommand.dynamic.Sub;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -15,6 +14,9 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class LightBikes extends JavaPlugin {
     private static LightBikes instance;
+    private static String NAME;
+
+    private Database sql;
 
     public void onEnable() {
         instance = this;
@@ -23,38 +25,164 @@ public class LightBikes extends JavaPlugin {
         base.autoRegisterFrom(this);
         getCommand("lightbikes").setExecutor(base);
 
-        //getServer().getPluginManager().registerEvents(this,this);
-
         //add custom entities
         for (BikeType bikeType : BikeType.values()) {
             BikeNMS.addCustomEntity(bikeType.getBikeClass(), bikeType.getName(), bikeType.getId());
         }
+
+        loadConfig();
     }
 
-    @Sub(name = "ridebike", usage = "<name>", description = "Get a bike",
-            permission = "lightbikes.ridebike", minArgs = 1)
-    public void test(CallInfo call) {
-        String query = normalize(call.getArg(0));
+    public void loadConfig() {
+        saveDefaultConfig();
 
-        BikeType closest = null;
-        int closestDistance = Integer.MAX_VALUE;
-        for (BikeType bikeType : BikeType.values()) {
-            int distance = StringUtils.getLevenshteinDistance(query, normalize(bikeType.getName()));
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                closest = bikeType;
+        //LOAD SQL DATABASE
+
+        DatabaseType databaseType = DatabaseType.SQLite;
+        String prefix = "[" + NAME + "] ";
+        String hostname = "localhost";
+        int port = 3306;
+        String database = NAME;
+        String username = "username";
+        String password = "password";
+
+        String directory = this.getDataFolder().getAbsolutePath();
+
+        if (getConfig().isString("database.type")) {
+            String databaseTypeString = getConfig().getString("database");
+            if (DatabaseType.isDatabaseType(databaseTypeString)) {
+                databaseType = DatabaseType.getDatabaseType(databaseTypeString);
+            } else {
+                getLogger().severe("Database \"" + databaseTypeString + "\" is not a valid database type!");
+                getLogger().severe("Defaulting to SQLite instead...");
             }
         }
-        net.minecraft.server.v1_7_R1.Entity bike = BikeNMS.spawnBike(BikeType.PIG, call.getPlayer().getLocation());
-        if (bike instanceof Bike) {
-            ((Bike) bike).setDirection(Direction.fromYaw(call.getPlayer().getLocation().getYaw()));
+
+        if (getConfig().isString("database.hostname")) {
+            hostname = getConfig().getString("database.hostname");
         }
-        bike.getBukkitEntity().setPassenger(call.getPlayer());
-        call.reply("{GREEN}Created the bike!");
+        if (getConfig().isInt("database.port")) {
+            port = getConfig().getInt("database.port");
+        }
+        if (getConfig().isString("database.database")) {
+            database = getConfig().getString("database.database");
+        }
+        if (getConfig().isString("database.username")) {
+            username = getConfig().getString("database.username");
+        }
+        if (getConfig().isString("database.password")) {
+            password = getConfig().getString("database.password");
+        }
+        if (getConfig().isString("database.directory")) {
+            directory = getConfig().getString("database.directory");
+        }
+
+        switch (databaseType) {
+            case MySQL:
+                sql = new MySQL(
+                        getLogger(),
+                        prefix,
+                        hostname,
+                        3306,
+                        database,
+                        username,
+                        password);
+                break;
+            case MongoDB:
+                sql = new Mongo(
+                        getLogger(),
+                        prefix,
+                        hostname,
+                        port,
+                        database,
+                        username,
+                        password);
+                break;
+            case SQLite:
+                sql = new SQLite(
+                        getLogger(),
+                        prefix,
+                        directory,
+                        database);
+                break;
+        }
+
+        getLogger().info("Attempting to establish connection to database...");
+        //if it didnt open
+        if (!sql.open()) {
+            getLogger().severe("Could not connect to database! Defaulting to SQLite instead!");
+            sql = new SQLite(
+                    getLogger(),
+                    prefix,
+                    directory,
+                    database);
+
+            //if not sqlite try sqlite instead
+            if (!(sql instanceof SQLite)) {
+                getLogger().info("Attempting to establish connection to database...");
+                if (!sql.open()) {
+                    getLogger().severe("Could not connect to SQLite either! Disabling plugin... :(");
+                    getServer().getPluginManager().disablePlugin(this);
+                    return;
+                } else {
+                    getLogger().info("Database connection successful!");
+                }
+            } else {
+                getLogger().severe("Could not connect to SQLite! Disabling plugin... :(");
+                getServer().getPluginManager().disablePlugin(this);
+                return;
+            }
+
+        } else {
+            getLogger().info("Database connection successful!");
+        }
+        //TODO read sql data
+
+
     }
 
-    public String normalize(String s) {
-        return s.toLowerCase().replace("_", "");
+    private enum DatabaseType {
+        MySQL("mysql", 3306),
+        MongoDB("mongodb", 27017),
+        SQLite("sqlite");
+
+        private String name;
+        private int defaultPort;
+
+        private DatabaseType(String name) {
+            this.name = name;
+        }
+
+        private DatabaseType(String name, int port) {
+            this.name = name;
+            this.defaultPort = port;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getDefaultPort() {
+            return defaultPort;
+        }
+
+        public static boolean isDatabaseType(String name) {
+            for (DatabaseType type : values()) {
+                if (type.getName().equalsIgnoreCase(name)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static DatabaseType getDatabaseType(String name) {
+            for (DatabaseType type : values()) {
+                if (type.getName().equalsIgnoreCase(name)) {
+                    return type;
+                }
+            }
+            return null;
+        }
     }
 
     public static LightBikes getInstance() {

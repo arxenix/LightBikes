@@ -1,0 +1,7 @@
+database:
+  type: MySQL
+  hostname: localhost
+  port: 3306
+  database: LightBikes
+  username: minecraft
+  password: password

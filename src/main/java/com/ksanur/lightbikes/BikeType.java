@@ -1,7 +1,6 @@
 package com.ksanur.lightbikes;
 
-import com.ksanur.lightbikes.bikes.BikePig;
-import com.ksanur.lightbikes.bikes.SheepBike;
+import com.ksanur.lightbikes.bikes.*;
 import org.bukkit.entity.EntityType;
 
 /**
@@ -10,17 +9,22 @@ import org.bukkit.entity.EntityType;
  * Time: 11:54 PM
  */
 public enum BikeType {
-    PIG("Pig",90, EntityType.SKELETON, BikePig.class),;
+    PIG("Pig", 90, EntityType.PIG, PigBike.class),
+    SHEEP("Sheep", 91, EntityType.SHEEP, SheepBike.class),
+    COW("Cow", 92, EntityType.COW, CowBike.class),
+    CHICKEN("Chicken", 93, EntityType.CHICKEN, ChickenBike.class),
+    SQUID("Squid", 94, EntityType.SQUID, SquidBike.class);
 
     private String name;
     private int id;
     private EntityType type;
     private Class bikeClass;
-    private BikeType(String name, int id, EntityType type, Class bikeClass){
-        this.name=name;
-        this.id=id;
-        this.type=type;
-        this.bikeClass=bikeClass;
+
+    private BikeType(String name, int id, EntityType type, Class bikeClass) {
+        this.name = name;
+        this.id = id;
+        this.type = type;
+        this.bikeClass = bikeClass;
     }
 
     public String getName() {

@@ -4,11 +4,11 @@ import net.minecraft.server.v1_7_R1.World;
 
 /**
  * User: bobacadodl
- * Date: 1/21/14
- * Time: 10:13 PM
+ * Date: 1/22/14
+ * Time: 10:05 PM
  */
-public class BikePig extends EntityBike {
-    public BikePig(World world) {
+public class CowBike extends Bike {
+    public CowBike(World world) {
         super(world);
     }
 }

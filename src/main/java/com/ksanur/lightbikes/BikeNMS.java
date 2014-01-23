@@ -1,16 +1,13 @@
 package com.ksanur.lightbikes;
 
-import com.ksanur.lightbikes.bikes.BikePig;
+import com.ksanur.lightbikes.bikes.PigBike;
 import com.ksanur.lightbikes.bikes.SheepBike;
 import com.ksanur.lightbikes.bikes.SquidBike;
-import net.minecraft.server.v1_7_R1.*;
 import net.minecraft.server.v1_7_R1.Entity;
-import org.bukkit.Bukkit;
+import net.minecraft.server.v1_7_R1.World;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_7_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_7_R1.entity.*;
-import org.bukkit.entity.*;
+import org.bukkit.entity.EntityType;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -24,15 +21,16 @@ import java.util.Map;
  * Time: 4:12 PM
  */
 public class BikeNMS {
-    protected static Map<EntityType,Class> bikeClassMap = new HashMap<EntityType,Class>(){{
+    protected static Map<EntityType, Class> bikeClassMap = new HashMap<EntityType, Class>() {{
         //put(EntityType.PIG,PigBike.class);
-        put(EntityType.PIG,BikePig.class);
-        put(EntityType.SQUID,SquidBike.class);
-        put(EntityType.SHEEP,SheepBike.class);
+        put(EntityType.PIG, PigBike.class);
+        put(EntityType.SQUID, SquidBike.class);
+        put(EntityType.SHEEP, SheepBike.class);
     }};
 
 
     protected static Field mapStringToClassField, mapClassToStringField, mapClassToIdField, mapStringToIdField;
+
     //protected static Field mapIdToClassField;
     static {
         try {
@@ -52,20 +50,17 @@ public class BikeNMS {
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    protected static Entity spawnBike(EntityType bikeType, Location loc) {
+    protected static Entity spawnBike(BikeType bikeType, Location loc) {
         World nmsWorld = ((CraftWorld) loc.getWorld()).getHandle();
 
         //get class SquidBike.class
-        Class bikeClass = bikeClassMap.get(bikeType);
-        System.out.println("bikeClassName:"+bikeClass.getName());
-        if(bikeClass!=null){
-            try{
+        Class bikeClass = bikeType.getBikeClass();
+        if (bikeClass != null) {
+            try {
                 //get constructor- public SquidBike(world);
                 Constructor nmsCtor = bikeClass.getConstructor(World.class);
                 //create nms entity - ex new SquidBike(world);
                 Entity bikeNMSEntity = (Entity) nmsCtor.newInstance(nmsWorld);
-                System.out.println("bikeNMSEntity Name:"+bikeNMSEntity.getName());
                 //tp the entity
                 bikeNMSEntity.setPosition(loc.getX(), loc.getY(), loc.getZ());
                 nmsWorld.addEntity(bikeNMSEntity);

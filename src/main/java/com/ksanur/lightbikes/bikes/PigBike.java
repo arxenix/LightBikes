@@ -4,11 +4,11 @@ import net.minecraft.server.v1_7_R1.World;
 
 /**
  * User: bobacadodl
- * Date: 1/20/14
- * Time: 7:24 PM
+ * Date: 1/21/14
+ * Time: 10:13 PM
  */
-public class SheepBike extends Bike {
-    public SheepBike(World world) {
+public class PigBike extends Bike {
+    public PigBike(World world) {
         super(world);
     }
 }

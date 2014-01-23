@@ -2,7 +2,8 @@ name: LightBikes
 main: com.ksanur.lightbikes.LightBikes
 version: ${version}
 description: LightBikes minigame
+author: bobacadodl
 commands:
   lightbikes:
-    description: LightBikes command
+    description: LightBikes main command
     aliases: [tron, lightbike, lb]

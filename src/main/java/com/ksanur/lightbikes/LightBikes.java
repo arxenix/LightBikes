@@ -1,11 +1,12 @@
 package com.ksanur.lightbikes;
 
 import lib.PatPeter.SQLibrary.Database;
-import lib.PatPeter.SQLibrary.Mongo;
 import lib.PatPeter.SQLibrary.MySQL;
 import lib.PatPeter.SQLibrary.SQLite;
 import mondocommand.MondoCommand;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.sql.SQLException;
 
 /**
  * User: bobacadodl
@@ -16,7 +17,8 @@ public class LightBikes extends JavaPlugin {
     private static LightBikes instance;
     private static String NAME;
 
-    private Database sql;
+    private static Database sql;
+    private static DatabaseType databaseType = DatabaseType.SQLite;
 
     public void onEnable() {
         instance = this;
@@ -37,8 +39,6 @@ public class LightBikes extends JavaPlugin {
         saveDefaultConfig();
 
         //LOAD SQL DATABASE
-
-        DatabaseType databaseType = DatabaseType.SQLite;
         String prefix = "[" + NAME + "] ";
         String hostname = "localhost";
         int port = 3306;
@@ -73,9 +73,6 @@ public class LightBikes extends JavaPlugin {
         if (getConfig().isString("database.password")) {
             password = getConfig().getString("database.password");
         }
-        if (getConfig().isString("database.directory")) {
-            directory = getConfig().getString("database.directory");
-        }
 
         switch (databaseType) {
             case MySQL:
@@ -88,22 +85,13 @@ public class LightBikes extends JavaPlugin {
                         username,
                         password);
                 break;
-            case MongoDB:
-                sql = new Mongo(
-                        getLogger(),
-                        prefix,
-                        hostname,
-                        port,
-                        database,
-                        username,
-                        password);
-                break;
             case SQLite:
                 sql = new SQLite(
                         getLogger(),
                         prefix,
                         directory,
-                        database);
+                        database,
+                        ".sqlite");
                 break;
         }
 
@@ -111,14 +99,14 @@ public class LightBikes extends JavaPlugin {
         //if it didnt open
         if (!sql.open()) {
             getLogger().severe("Could not connect to database! Defaulting to SQLite instead!");
-            sql = new SQLite(
-                    getLogger(),
-                    prefix,
-                    directory,
-                    database);
-
             //if not sqlite try sqlite instead
             if (!(sql instanceof SQLite)) {
+                sql = new SQLite(
+                        getLogger(),
+                        prefix,
+                        directory,
+                        database);
+                databaseType = DatabaseType.SQLite;
                 getLogger().info("Attempting to establish connection to database...");
                 if (!sql.open()) {
                     getLogger().severe("Could not connect to SQLite either! Disabling plugin... :(");
@@ -138,51 +126,37 @@ public class LightBikes extends JavaPlugin {
         }
         //TODO read sql data
 
-
+        //create default tables
+        switch (databaseType) {
+            case SQLite:
+                try {
+                    sql.prepare("CREATE TABLE IF NOT EXISTS LightBikes.players (" +
+                            "id     int PRIMARY KEY AUTO_INCREMENT NOT NULL," +
+                            "player varchar(20) NOT NULL," +
+                            "online bool NOT NULL);").executeQuery();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case MySQL:
+                try {
+                    sql.prepare("CREATE TABLE IF NOT EXISTS `players` (" +
+                            "`id`     int PRIMARY KEY AUTO_INCREMENT NOT NULL," +
+                            "`player` varchar(20) NOT NULL," +
+                            "`online` bool NOT NULL);").executeQuery();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
+        }
     }
 
-    private enum DatabaseType {
-        MySQL("mysql", 3306),
-        MongoDB("mongodb", 27017),
-        SQLite("sqlite");
+    public static Database getSQL() {
+        return sql;
+    }
 
-        private String name;
-        private int defaultPort;
-
-        private DatabaseType(String name) {
-            this.name = name;
-        }
-
-        private DatabaseType(String name, int port) {
-            this.name = name;
-            this.defaultPort = port;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public int getDefaultPort() {
-            return defaultPort;
-        }
-
-        public static boolean isDatabaseType(String name) {
-            for (DatabaseType type : values()) {
-                if (type.getName().equalsIgnoreCase(name)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public static DatabaseType getDatabaseType(String name) {
-            for (DatabaseType type : values()) {
-                if (type.getName().equalsIgnoreCase(name)) {
-                    return type;
-                }
-            }
-            return null;
-        }
+    public static DatabaseType getDatabaseType() {
+        return databaseType;
     }
 
     public static LightBikes getInstance() {

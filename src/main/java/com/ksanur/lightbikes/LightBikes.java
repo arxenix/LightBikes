@@ -21,6 +21,8 @@ public class LightBikes extends JavaPlugin {
     private static DatabaseType databaseType = DatabaseType.SQLite;
 
     public void onEnable() {
+
+
         instance = this;
 
         MondoCommand base = new MondoCommand();
@@ -128,22 +130,13 @@ public class LightBikes extends JavaPlugin {
 
         //create default tables
         switch (databaseType) {
+            case MySQL:
             case SQLite:
                 try {
                     sql.prepare("CREATE TABLE IF NOT EXISTS LightBikes.players (" +
                             "id     int PRIMARY KEY AUTO_INCREMENT NOT NULL," +
                             "player varchar(20) NOT NULL," +
                             "online bool NOT NULL);").executeQuery();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                break;
-            case MySQL:
-                try {
-                    sql.prepare("CREATE TABLE IF NOT EXISTS `players` (" +
-                            "`id`     int PRIMARY KEY AUTO_INCREMENT NOT NULL," +
-                            "`player` varchar(20) NOT NULL," +
-                            "`online` bool NOT NULL);").executeQuery();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }

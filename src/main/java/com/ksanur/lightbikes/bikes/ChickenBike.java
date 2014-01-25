@@ -11,4 +11,8 @@ public class ChickenBike extends Bike {
     public ChickenBike(World world) {
         super(world);
     }
+
+    protected void makeStepSound() {
+        this.makeSound("mob.chicken.step", 0.15F, 1.0F);
+    }
 }

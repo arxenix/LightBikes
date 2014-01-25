@@ -9,11 +9,11 @@ import org.bukkit.entity.EntityType;
  * Time: 11:54 PM
  */
 public enum BikeType {
-    PIG("Pig", 90, EntityType.PIG, PigBike.class),
-    SHEEP("Sheep", 91, EntityType.SHEEP, SheepBike.class),
-    COW("Cow", 92, EntityType.COW, CowBike.class),
-    CHICKEN("Chicken", 93, EntityType.CHICKEN, ChickenBike.class),
-    SQUID("Squid", 94, EntityType.SQUID, SquidBike.class);
+    PIG("PigBike", 90, EntityType.PIG, PigBike.class),
+    SHEEP("SheepBike", 91, EntityType.SHEEP, SheepBike.class),
+    COW("CowBike", 92, EntityType.COW, CowBike.class),
+    CHICKEN("ChickenBike", 93, EntityType.CHICKEN, ChickenBike.class),
+    SQUID("SquidBike", 94, EntityType.SQUID, SquidBike.class);
 
     private String name;
     private int id;

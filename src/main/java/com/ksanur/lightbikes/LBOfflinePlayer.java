@@ -2,7 +2,7 @@ package com.ksanur.lightbikes;
 
 import org.bukkit.OfflinePlayer;
 
-import java.io.File;
+import java.sql.SQLException;
 
 /**
  * User: bobacadodl
@@ -10,7 +10,6 @@ import java.io.File;
  * Time: 11:48 PM
  */
 public class LBOfflinePlayer {
-    File playerFile;
     private int id;
     private int wins;
     private int losses;
@@ -18,29 +17,42 @@ public class LBOfflinePlayer {
     private OfflinePlayer player;
 
     public LBOfflinePlayer(OfflinePlayer player) {
-        if (LightBikes.getSQL().isOpen()) {
-            switch (LightBikes.getDatabaseType()) {
-                case MySQL:
-
-                    break;
-                case SQLite:
-
-                    break;
-            }
+        if (!LightBikes.getSQL().isOpen()) {
+            LightBikes.getSQL().open();
+        }
+        switch (LightBikes.getDatabaseType()) {
+            case MySQL:
+            case SQLite:
+                try {
+                    LightBikes.getSQL().prepare("");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
         }
     }
 
+    public void setWins(int wins) {
+        this.wins = wins;
+    }
+
+    public void addWin() {
+        ++wins;
+    }
+
     public int getWins() {
-        return 0;
+        return wins;
+    }
+
+    public void setLosses(int losses) {
+        this.losses = losses;
+    }
+
+    public void addLoss() {
+        ++losses;
     }
 
     public int getLosses() {
-        return 0;
+        return losses;
     }
-
-    public int getPoints() {
-        return 0;
-    }
-
-
 }

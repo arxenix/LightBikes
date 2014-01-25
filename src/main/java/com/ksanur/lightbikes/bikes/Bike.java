@@ -5,7 +5,6 @@ import net.minecraft.server.v1_7_R1.*;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
-import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftCreature;
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftEntity;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -174,12 +173,35 @@ public class Bike extends EntityCreature implements IAnimal {
         final Location track = new Location(world.getWorld(), locX, locY, locZ);
         new BukkitRunnable() {
             public void run() {
-                Block block = track.getBlock();
+                org.bukkit.block.Block block = track.getBlock();
                 block.setType(org.bukkit.Material.STAINED_GLASS_PANE);
                 block.setData(color.getWoolData());
             }
         }.runTaskLater(LightBikes.getInstance(), 5L);
     }
+
+    protected void c() {
+        super.c();
+        try {
+            initDatawatcher();
+        } catch (Exception e) {
+        }
+    }
+
+    protected void a(int i, int j, int k, Block block) {
+        super.a(i, j, k, block);
+        try {
+            makeStepSound();
+        } catch (Exception e) {
+        }
+    }
+
+    protected void makeStepSound() {
+    }
+
+    protected void initDatawatcher() {
+    }
+
 
     @Override
     public ItemStack be() {

@@ -13,5 +13,6 @@ public class LBPlayer extends LBOfflinePlayer {
     public LBPlayer(Player player) {
         super(player);
         this.player = player;
+
     }
 }

@@ -13,7 +13,13 @@ public enum BikeType {
     SHEEP("SheepBike", 91, EntityType.SHEEP, SheepBike.class),
     COW("CowBike", 92, EntityType.COW, CowBike.class),
     CHICKEN("ChickenBike", 93, EntityType.CHICKEN, ChickenBike.class),
-    SQUID("SquidBike", 94, EntityType.SQUID, SquidBike.class);
+    SQUID("SquidBike", 94, EntityType.SQUID, SquidBike.class),
+    WOLF("WolfBike", 95, EntityType.WOLF, WolfBike.class),
+    MOOSHROOM("MooshroomBike", 96, EntityType.MUSHROOM_COW, MooshroomBike.class),
+    OCELOT("OcelotBike", 98, EntityType.OCELOT, OcelotBike.class),
+    SILVERFISH("SilverfishBike", 60, EntityType.SILVERFISH, SilverfishBike.class),
+    BOAT("BoatBike", 41, EntityType.BOAT, BoatBike.class),
+    MINECART("MinecartBike", 42, EntityType.MINECART, MinecartBike.class);
 
     private String name;
     private int id;

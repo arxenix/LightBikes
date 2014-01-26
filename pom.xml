@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>LightBikes</groupId>
+    <groupId>com.ksanur</groupId>
     <artifactId>LightBikes</artifactId>
     <version>0.1</version>
 
@@ -21,6 +21,10 @@
             <id>dakani</id>
             <name>Dakani Nexus Repo</name>
             <url>http://repo.dakanilabs.com/content/repositories/public</url>
+        </repository>
+        <repository>
+            <id>daboross</id>
+            <url>http://repo.daboross.net/</url>
         </repository>
     </repositories>
 
@@ -51,8 +55,13 @@
             <artifactId>SQLibrary</artifactId>
             <version>LATEST</version>
         </dependency>
+        <dependency>
+            <groupId>com.mojang</groupId>
+            <artifactId>AccountsClient</artifactId>
+            <version>LATEST</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
-
     <build>
         <resources>
             <resource>

@@ -13,6 +13,24 @@ public class LBPlayer extends LBOfflinePlayer {
     public LBPlayer(Player player) {
         super(player);
         this.player = player;
+    }
 
+    public boolean load() {
+        if (super.load()) {
+            //load
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void unload() {
+
+    }
+
+    public boolean canUseBike(BikeType type) {
+        String typeString = type.toString().toLowerCase();
+        return player.hasPermission("lightbikes.bikes." + typeString);
     }
 }

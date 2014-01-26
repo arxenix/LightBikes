@@ -2,8 +2,6 @@ package com.ksanur.lightbikes;
 
 import org.bukkit.OfflinePlayer;
 
-import java.sql.SQLException;
-
 /**
  * User: bobacadodl
  * Date: 1/22/14
@@ -14,22 +12,18 @@ public class LBOfflinePlayer {
     private int wins;
     private int losses;
 
-    private OfflinePlayer player;
+    private final OfflinePlayer player;
 
     public LBOfflinePlayer(OfflinePlayer player) {
-        if (!LightBikes.getSQL().isOpen()) {
-            LightBikes.getSQL().open();
-        }
-        switch (LightBikes.getDatabaseType()) {
-            case MySQL:
-            case SQLite:
-                try {
-                    LightBikes.getSQL().prepare("");
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                break;
-        }
+        this.player = player;
+    }
+
+    public boolean load() {
+        return true;
+    }
+
+    public void unload() {
+
     }
 
     public void setWins(int wins) {

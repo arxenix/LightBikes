@@ -1,9 +1,14 @@
 package com.ksanur.lightbikes;
 
+import com.ksanur.lightbikes.bikes.Bike;
+import com.ksanur.lightbikes.bikes.Direction;
 import lib.PatPeter.SQLibrary.Database;
 import lib.PatPeter.SQLibrary.MySQL;
 import lib.PatPeter.SQLibrary.SQLite;
+import mondocommand.CallInfo;
 import mondocommand.MondoCommand;
+import mondocommand.dynamic.Sub;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
@@ -21,21 +26,43 @@ public class LightBikes extends JavaPlugin {
     private static DatabaseType databaseType = DatabaseType.SQLite;
 
     public void onEnable() {
-
-
         instance = this;
-
-        MondoCommand base = new MondoCommand();
-        base.autoRegisterFrom(this);
-        getCommand("lightbikes").setExecutor(base);
 
         //add custom entities
         for (BikeType bikeType : BikeType.values()) {
             BikeNMS.addCustomEntity(bikeType.getBikeClass(), bikeType.getName(), bikeType.getId());
         }
 
-        loadConfig();
+        //loadConfig();
+
+        MondoCommand base = new MondoCommand();
+        base.autoRegisterFrom(this);
+        getCommand("lightbikes").setExecutor(base);
+
+
     }
+
+    @Sub(name = "ridebike", usage = "<name>", description = "Get a bike",
+            permission = "lightbikes.ridebike", minArgs = 1)
+    public void test(CallInfo call) {
+        String query = call.getArg(0);
+
+        BikeType closest = null;
+        int closestDistance = Integer.MAX_VALUE;
+        for (BikeType bikeType : BikeType.values()) {
+            int distance = StringUtils.getLevenshteinDistance(query, bikeType.toString().toLowerCase());
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closest = bikeType;
+            }
+        }
+
+        Bike bike = BikeNMS.spawnBike(closest, call.getPlayer().getLocation());
+        bike.setDirection(Direction.fromYaw(call.getPlayer().getLocation().getYaw()));
+        bike.getBukkitEntity().setPassenger(call.getPlayer());
+        call.reply("{GREEN}Spawned bike!");
+    }
+
 
     public void loadConfig() {
         saveDefaultConfig();
@@ -134,9 +161,11 @@ public class LightBikes extends JavaPlugin {
             case SQLite:
                 try {
                     sql.prepare("CREATE TABLE IF NOT EXISTS LightBikes.players (" +
-                            "id     int PRIMARY KEY AUTO_INCREMENT NOT NULL," +
-                            "player varchar(20) NOT NULL," +
-                            "online bool NOT NULL);").executeQuery();
+                            "uuid   int PRIMARY KEY NOT NULL," +
+                            "player varchar(20)     NOT NULL," +
+                            "online bool            NOT NULL," +
+                            "wins   int             NOT NULL," +
+                            "losses int             NOT NULL);").executeQuery();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }

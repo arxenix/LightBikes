@@ -1,4 +1,4 @@
-package com.ksanur.lightbikes.bikes;
+package com.ksanur.lightbikes.nms.v1_7_R1.bikes;
 
 import net.minecraft.server.v1_7_R1.BlockCloth;
 import net.minecraft.server.v1_7_R1.World;
@@ -10,7 +10,7 @@ import org.bukkit.DyeColor;
  * Time: 10:06 PM
  */
 //https://github.com/Bukkit/mc-dev/blob/master/net/minecraft/server/EntityWolf.java
-public class WolfBike extends AgeableBike {
+public class WolfBike extends AgeableBike implements com.ksanur.lightbikes.nms.bikes.WolfBike {
     public WolfBike(World world) {
         super(world);
     }

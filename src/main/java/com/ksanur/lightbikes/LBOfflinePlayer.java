@@ -2,15 +2,18 @@ package com.ksanur.lightbikes;
 
 import org.bukkit.OfflinePlayer;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 /**
  * User: bobacadodl
  * Date: 1/22/14
  * Time: 11:48 PM
  */
 public class LBOfflinePlayer {
-    private int id;
-    private int wins;
-    private int losses;
+    protected int wins;
+    protected int losses;
 
     private final OfflinePlayer player;
 
@@ -19,7 +22,28 @@ public class LBOfflinePlayer {
     }
 
     public boolean load() {
-        return true;
+        try {
+            switch (LightBikes.getDatabaseType()) {
+                case MySQL:
+                case SQLite:
+                    PreparedStatement preparedStatement = LightBikes.getSQL().prepare("SELECT * FROM `players` WHERE `player` = '?';");
+                    preparedStatement.setString(1, player.getName());
+                    ResultSet resultSet = preparedStatement.executeQuery();
+                    if (resultSet.next()) {
+                        int wins = resultSet.getInt("wins");
+                        int losses = resultSet.getInt("losses");
+                        this.wins = wins;
+                        this.losses = losses;
+                        return true;
+                    } else {
+                        return false;
+                    }
+            }
+            return false;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return false;
+        }
     }
 
     public void unload() {

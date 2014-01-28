@@ -1,4 +1,4 @@
-package com.ksanur.lightbikes.bikes;
+package com.ksanur.lightbikes.nms.v1_7_R1.bikes;
 
 import net.minecraft.server.v1_7_R1.World;
 
@@ -7,7 +7,7 @@ import net.minecraft.server.v1_7_R1.World;
  * Date: 1/20/14
  * Time: 7:24 PM
  */
-public class SheepBike extends Bike {
+public class SheepBike extends Bike implements com.ksanur.lightbikes.nms.bikes.SheepBike {
     public SheepBike(World world) {
         super(world);
     }

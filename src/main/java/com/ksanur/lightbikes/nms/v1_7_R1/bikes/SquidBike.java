@@ -1,4 +1,4 @@
-package com.ksanur.lightbikes.bikes;
+package com.ksanur.lightbikes.nms.v1_7_R1.bikes;
 
 import net.minecraft.server.v1_7_R1.World;
 
@@ -7,7 +7,7 @@ import net.minecraft.server.v1_7_R1.World;
  * Date: 1/20/14
  * Time: 3:39 PM
  */
-public class SquidBike extends Bike {
+public class SquidBike extends Bike implements com.ksanur.lightbikes.nms.bikes.Bike {
     public SquidBike(World world) {
         super(world);
     }

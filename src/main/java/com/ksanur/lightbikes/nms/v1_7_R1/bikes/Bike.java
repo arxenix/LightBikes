@@ -1,4 +1,4 @@
-package com.ksanur.lightbikes.bikes;
+package com.ksanur.lightbikes.nms.v1_7_R1.bikes;
 
 import com.ksanur.lightbikes.LightBikes;
 import net.minecraft.server.v1_7_R1.*;
@@ -16,8 +16,8 @@ import java.lang.reflect.Field;
  * Date: 1/21/14
  * Time: 10:05 PM
  */
-public class Bike extends EntityCreature implements IAnimal {
-    Direction currentDirection = Direction.NORTH;
+public class Bike extends EntityCreature implements IAnimal, com.ksanur.lightbikes.nms.bikes.Bike {
+    com.ksanur.lightbikes.nms.bikes.Direction currentDirection = com.ksanur.lightbikes.nms.bikes.Direction.NORTH;
     long lastTurned = 0;
     long turnDelay = 500;
 
@@ -120,14 +120,14 @@ public class Bike extends EntityCreature implements IAnimal {
         return acceleration;
     }
 
-    public void setDirection(Direction direction) {
+    public void setDirection(com.ksanur.lightbikes.nms.bikes.Direction direction) {
         this.currentDirection = direction;
         this.lastYaw = this.yaw = direction.getYaw();
         this.b(this.yaw, this.pitch);
         this.aP = this.aN = this.yaw;
     }
 
-    public Direction getDirection() {
+    public com.ksanur.lightbikes.nms.bikes.Direction getDirection() {
         return currentDirection;
     }
 
@@ -152,7 +152,7 @@ public class Bike extends EntityCreature implements IAnimal {
         if (time - lastTurned >= turnDelay) {
             ((EntityPlayer) this.passenger).getBukkitEntity().playSound(new Location(world.getWorld(), locX, locY, locZ), Sound.NOTE_PLING, 1.0f, 1.0f);
             lastTurned = time;
-            currentDirection = Direction.getRightDirection(currentDirection);
+            currentDirection = com.ksanur.lightbikes.nms.bikes.Direction.getRightDirection(currentDirection);
         }
     }
 
@@ -161,7 +161,7 @@ public class Bike extends EntityCreature implements IAnimal {
         if (time - lastTurned >= turnDelay) {
             ((EntityPlayer) this.passenger).getBukkitEntity().playSound(new Location(world.getWorld(), locX, locY, locZ), Sound.NOTE_PLING, 1.0f, 1.0f);
             lastTurned = time;
-            currentDirection = Direction.getLeftDirection(currentDirection);
+            currentDirection = com.ksanur.lightbikes.nms.bikes.Direction.getLeftDirection(currentDirection);
         }
     }
 
@@ -177,7 +177,7 @@ public class Bike extends EntityCreature implements IAnimal {
                 block.setType(org.bukkit.Material.STAINED_GLASS_PANE);
                 block.setData(color.getWoolData());
             }
-        }.runTaskLater(LightBikes.getInstance(), 5L);
+        }.runTaskLater(LightBikes.getInstance(), 10L);
     }
 
     protected void c() {

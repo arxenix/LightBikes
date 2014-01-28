@@ -1,4 +1,4 @@
-package com.ksanur.lightbikes.bikes;
+package com.ksanur.lightbikes.nms.bikes;
 
 /**
  * User: bobacadodl
@@ -12,34 +12,31 @@ public enum Direction {
     WEST(90);
 
     private final float yaw;
-    private Direction(float yaw){
-        this.yaw=yaw;
+
+    private Direction(float yaw) {
+        this.yaw = yaw;
     }
 
-    public float getYaw(){
+    public float getYaw() {
         return yaw;
     }
 
-    public static Direction fromYaw(float yaw){
-        if(yaw <= 45 || yaw > 315){
+    public static Direction fromYaw(float yaw) {
+        if (yaw <= 45 || yaw > 315) {
             return SOUTH;
-        }
-        else if(yaw > 45 && yaw <= 135){
+        } else if (yaw > 45 && yaw <= 135) {
             return WEST;
-        }
-        else if(yaw > 135 && yaw <= 225){
+        } else if (yaw > 135 && yaw <= 225) {
             return NORTH;
-        }
-        else if(yaw > 225 && yaw <= 315){
+        } else if (yaw > 225 && yaw <= 315) {
             return EAST;
-        }
-        else{
+        } else {
             return NORTH;
         }
     }
 
-    public static Direction getRightDirection(Direction d){
-        switch(d){
+    public static Direction getRightDirection(Direction d) {
+        switch (d) {
             case NORTH:
                 return EAST;
             case EAST:
@@ -52,8 +49,8 @@ public enum Direction {
         return null;
     }
 
-    public static Direction getLeftDirection(Direction d){
-        switch(d){
+    public static Direction getLeftDirection(Direction d) {
+        switch (d) {
             case NORTH:
                 return WEST;
             case EAST:

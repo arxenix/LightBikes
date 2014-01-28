@@ -1,7 +1,7 @@
 package com.ksanur.lightbikes;
 
-import com.ksanur.lightbikes.bikes.Bike;
-import com.ksanur.lightbikes.bikes.Direction;
+import com.ksanur.lightbikes.nms.bikes.Bike;
+import com.ksanur.lightbikes.nms.bikes.Direction;
 import lib.PatPeter.SQLibrary.Database;
 import lib.PatPeter.SQLibrary.MySQL;
 import lib.PatPeter.SQLibrary.SQLite;
@@ -9,9 +9,12 @@ import mondocommand.CallInfo;
 import mondocommand.MondoCommand;
 import mondocommand.dynamic.Sub;
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 
 /**
  * User: bobacadodl
@@ -25,13 +28,18 @@ public class LightBikes extends JavaPlugin {
     private static Database sql;
     private static DatabaseType databaseType = DatabaseType.SQLite;
 
+    private static HashMap<Player, LBPlayer> players = new HashMap<Player, LBPlayer>();
+
     public void onEnable() {
         instance = this;
 
         //add custom entities
         for (BikeType bikeType : BikeType.values()) {
-            BikeNMS.addCustomEntity(bikeType.getBikeClass(), bikeType.getName(), bikeType.getId());
+            BikeNMS.registerBike(bikeType);
         }
+
+        //register glass panes
+        BikeNMS.hookBlocks();
 
         //loadConfig();
 
@@ -160,17 +168,25 @@ public class LightBikes extends JavaPlugin {
             case MySQL:
             case SQLite:
                 try {
-                    sql.prepare("CREATE TABLE IF NOT EXISTS LightBikes.players (" +
-                            "uuid   int PRIMARY KEY NOT NULL," +
-                            "player varchar(20)     NOT NULL," +
-                            "online bool            NOT NULL," +
-                            "wins   int             NOT NULL," +
-                            "losses int             NOT NULL);").executeQuery();
+                    sql.prepare("CREATE TABLE IF NOT EXISTS `players` (" +
+                            "`uuid`   int PRIMARY KEY NOT NULL," +
+                            "`player` varchar(20)     NOT NULL," +
+                            "`online` bool            NOT NULL," +
+                            "`wins`   int             NOT NULL," +
+                            "`losses` int             NOT NULL);").executeQuery();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
                 break;
         }
+    }
+
+    public static LBPlayer getLBPlayer(Player player) {
+        return players.get(player);
+    }
+
+    public static LBOfflinePlayer getOfflineLBPlayer(OfflinePlayer player) {
+        return new LBOfflinePlayer(player);
     }
 
     public static Database getSQL() {

@@ -1,13 +1,14 @@
 package com.ksanur.lightbikes;
 
-import com.ksanur.lightbikes.bikes.Bike;
-import net.minecraft.server.v1_7_R1.World;
+import com.ksanur.lightbikes.nms.NMSBlockProxy;
+import com.ksanur.lightbikes.nms.NMSMobRegistrationProxy;
+import com.ksanur.lightbikes.nms.NMSWorldRegistrationProxy;
+import com.ksanur.lightbikes.nms.bikes.Bike;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -16,77 +17,129 @@ import java.util.Map;
  * Time: 4:12 PM
  */
 public class BikeNMS {
+    private static NMSMobRegistrationProxy mobRegistration;
     protected static Field mapStringToClassField, mapClassToStringField, mapClassToIdField, mapStringToIdField;
 
-    //protected static Field mapIdToClassField;
     static {
         try {
-            mapStringToClassField = net.minecraft.server.v1_7_R1.EntityTypes.class.getDeclaredField("c");
-            mapClassToStringField = net.minecraft.server.v1_7_R1.EntityTypes.class.getDeclaredField("d");
-            //mapIdtoClassField = net.minecraft.server.v1_7_R1.EntityTypes.class.getDeclaredField("e");
-            mapClassToIdField = net.minecraft.server.v1_7_R1.EntityTypes.class.getDeclaredField("f");
-            mapStringToIdField = net.minecraft.server.v1_7_R1.EntityTypes.class.getDeclaredField("g");
+            String packageVersion = getPackageVersion();
+            Class<?> mobRegistrationClass = Class.forName("com.ksanur.lightbikes.nms." + packageVersion + ".MobRegistration");
 
-            mapStringToClassField.setAccessible(true);
-            mapClassToStringField.setAccessible(true);
-            //mapIdToClassField.setAccessible(true);
-            mapClassToIdField.setAccessible(true);
-            mapStringToIdField.setAccessible(true);
+            if (NMSMobRegistrationProxy.class.isAssignableFrom(mobRegistrationClass)) {
+                mobRegistration = ((NMSMobRegistrationProxy) mobRegistrationClass.newInstance());
+
+                mapStringToClassField = mobRegistration.getStringToClassField();
+                mapClassToStringField = mobRegistration.getClassToStringField();
+                mapClassToIdField = mobRegistration.getClassToIdField();
+                mapStringToIdField = mobRegistration.getStringToIdField();
+
+                mapStringToClassField.setAccessible(true);
+                mapClassToStringField.setAccessible(true);
+                mapClassToIdField.setAccessible(true);
+                mapStringToIdField.setAccessible(true);
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            failReflection();
         }
     }
 
     protected static Bike spawnBike(BikeType bikeType, Location loc) {
-        World nmsWorld = ((CraftWorld) loc.getWorld()).getHandle();
+        String packageVersion = getPackageVersion();
+        try {
+            Class<?> worldRegistrationClass = Class.forName("com.ksanur.lightbikes.nms." + packageVersion + ".WorldRegistration");
+            if (NMSWorldRegistrationProxy.class.isAssignableFrom(worldRegistrationClass)) {
+                NMSWorldRegistrationProxy worldRegistration = ((NMSWorldRegistrationProxy) worldRegistrationClass.newInstance());
+                Object nmsWorld = worldRegistration.getNMSWorld(loc.getWorld());
 
-        //get class SquidBike.class
-        Class bikeClass = bikeType.getBikeClass();
-        if (bikeClass != null) {
-            try {
-                //get constructor- public SquidBike(world);
-                Constructor bikeCtor = bikeClass.getConstructor(World.class);
-                //create nms entity - ex new SquidBike(world);
-                Bike bike = (Bike) bikeCtor.newInstance(nmsWorld);
-                //tp the entity
-                bike.setPosition(loc.getX(), loc.getY(), loc.getZ());
-                nmsWorld.addEntity(bike);
+                Class bikeClass = Class.forName("com.ksanur.lightbikes.nms." + packageVersion + ".bikes." + bikeType.getName());
+                if (Bike.class.isAssignableFrom(bikeClass)) {
+                    Class<?> nmsWorldClass = worldRegistration.getNMSWorldClass();
+                    Constructor bikeCtor = bikeClass.getConstructor(nmsWorldClass);
+                    Object bikeObject = bikeCtor.newInstance(nmsWorld);
 
-                return bike;
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                    Bike bike = (Bike) bikeObject;
+                    bike.setPosition(loc.getX(), loc.getY(), loc.getZ());
+
+                    Class entityClass = mobRegistration.getEntityClass();
+
+                    Method addEntity = nmsWorldClass.getDeclaredMethod("addEntity", entityClass);
+                    addEntity.invoke(nmsWorld, bikeObject);
+
+                    return bike;
+                } else {
+                    LightBikes.getInstance().getLogger().severe("Reflection failed! Failed to spawn bike!");
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            failReflection();
         }
         return null;
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    protected static void addCustomEntity(Class entityClass, String name, int id) {
-        if (mapStringToClassField != null && mapStringToIdField != null && mapClassToStringField != null && mapClassToIdField != null) {
-            try {
-                Map mapStringToClass = (Map) mapStringToClassField.get(null);
-                Map mapStringToId = (Map) mapStringToIdField.get(null);
-                Map mapClassToString = (Map) mapClassToStringField.get(null);
-                Map mapClassToId = (Map) mapClassToIdField.get(null);
+    protected static void registerBike(BikeType bikeType) {
+        String packageVersion = getPackageVersion();
+        try {
+            Class bikeClass = Class.forName("com.ksanur.lightbikes.nms." + packageVersion + ".bikes." + bikeType.getName());
 
-                mapStringToClass.put(name, entityClass);
-                mapStringToId.put(name, id);
-                mapClassToString.put(entityClass, name);
-                mapClassToId.put(entityClass, id);
+            Map mapStringToClass = (Map) mapStringToClassField.get(null);
+            Map mapStringToId = (Map) mapStringToIdField.get(null);
+            Map mapClassToString = (Map) mapClassToStringField.get(null);
+            Map mapClassToId = (Map) mapClassToIdField.get(null);
 
-                mapStringToClassField.set(null, mapStringToClass);
-                mapStringToIdField.set(null, mapStringToId);
-                mapClassToStringField.set(null, mapClassToString);
-                mapClassToIdField.set(null, mapClassToId);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            mapStringToClass.put(bikeType.getName(), bikeClass);
+            mapStringToId.put(bikeType.getName(), bikeType.getId());
+            mapClassToString.put(bikeClass, bikeType.getName());
+            mapClassToId.put(bikeClass, bikeType.getId());
+
+            mapStringToClassField.set(null, mapStringToClass);
+            mapStringToIdField.set(null, mapStringToId);
+            mapClassToStringField.set(null, mapClassToString);
+            mapClassToIdField.set(null, mapClassToId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            failReflection();
         }
+    }
+
+    public static void hookBlocks() {
+        String packageVersion = getPackageVersion();
+        try {
+            Class<?> lightPaneClass = Class.forName("com.ksanur.lightbikes.nms." + packageVersion + ".LightPane");
+            if (NMSBlockProxy.class.isAssignableFrom(lightPaneClass)) {
+                ((NMSBlockProxy) lightPaneClass.newInstance()).hook();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            failReflection();
+        }
+    }
+
+    private static String getPackageVersion() {
+        try {
+            Class<?> serverClass = LightBikes.getInstance().getServer().getClass();
+            if (serverClass.getName().contains("CraftServer")) {
+                String packageName = serverClass.getPackage().getName();
+                int dotIndex = packageName.lastIndexOf('.');
+                if (dotIndex != -1) {
+                    return packageName.substring(dotIndex + 1);
+                }
+            }
+        } catch (NoClassDefFoundError ignore) {
+        }
+        LightBikes.getInstance().getLogger().warning("You seem to have a pretty modified version of CraftBukkit. " +
+                "Could not get Package Version from CraftServer's package. Falling back to alternative implementation. " +
+                "If you experience any further errors with this plugins, these will almost definitely be caused by this. " +
+                "To fix this, get CraftBukkit or Spigot.");
+
+        return null;
+    }
+
+    private static void failReflection() {
+        LightBikes.getInstance().getLogger().severe("Reflection failed! This is an unsupported minecraft version! " +
+                "Please wait for an update of this plugin to be released, or downgrade. " +
+                "The plugin will now be disabled....");
+        LightBikes.getInstance().getPluginLoader().disablePlugin(LightBikes.getInstance());
     }
 }

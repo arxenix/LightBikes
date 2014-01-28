@@ -1,4 +1,4 @@
-package com.ksanur.lightbikes.bikes;
+package com.ksanur.lightbikes.nms.v1_7_R1.bikes;
 
 import net.minecraft.server.v1_7_R1.World;
 
@@ -7,7 +7,7 @@ import net.minecraft.server.v1_7_R1.World;
  * Date: 1/24/14
  * Time: 11:20 PM
  */
-public class OcelotBike extends AgeableBike {
+public class OcelotBike extends AgeableBike implements com.ksanur.lightbikes.nms.bikes.OcelotBike {
     public OcelotBike(World world) {
         super(world);
     }

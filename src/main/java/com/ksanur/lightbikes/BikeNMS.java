@@ -1,8 +1,8 @@
 package com.ksanur.lightbikes;
 
-import com.ksanur.lightbikes.nms.NMSBlockProxy;
-import com.ksanur.lightbikes.nms.NMSMobRegistrationProxy;
-import com.ksanur.lightbikes.nms.NMSWorldRegistrationProxy;
+import com.ksanur.lightbikes.nms.NMSBlockRegistration;
+import com.ksanur.lightbikes.nms.NMSMobRegistration;
+import com.ksanur.lightbikes.nms.NMSWorldRegistration;
 import com.ksanur.lightbikes.nms.bikes.Bike;
 import org.bukkit.Location;
 
@@ -17,7 +17,7 @@ import java.util.Map;
  * Time: 4:12 PM
  */
 public class BikeNMS {
-    private static NMSMobRegistrationProxy mobRegistration;
+    private static NMSMobRegistration mobRegistration;
     protected static Field mapStringToClassField, mapClassToStringField, mapClassToIdField, mapStringToIdField;
 
     static {
@@ -25,8 +25,8 @@ public class BikeNMS {
             String packageVersion = getPackageVersion();
             Class<?> mobRegistrationClass = Class.forName("com.ksanur.lightbikes.nms." + packageVersion + ".MobRegistration");
 
-            if (NMSMobRegistrationProxy.class.isAssignableFrom(mobRegistrationClass)) {
-                mobRegistration = ((NMSMobRegistrationProxy) mobRegistrationClass.newInstance());
+            if (NMSMobRegistration.class.isAssignableFrom(mobRegistrationClass)) {
+                mobRegistration = ((NMSMobRegistration) mobRegistrationClass.newInstance());
 
                 mapStringToClassField = mobRegistration.getStringToClassField();
                 mapClassToStringField = mobRegistration.getClassToStringField();
@@ -47,8 +47,8 @@ public class BikeNMS {
         String packageVersion = getPackageVersion();
         try {
             Class<?> worldRegistrationClass = Class.forName("com.ksanur.lightbikes.nms." + packageVersion + ".WorldRegistration");
-            if (NMSWorldRegistrationProxy.class.isAssignableFrom(worldRegistrationClass)) {
-                NMSWorldRegistrationProxy worldRegistration = ((NMSWorldRegistrationProxy) worldRegistrationClass.newInstance());
+            if (NMSWorldRegistration.class.isAssignableFrom(worldRegistrationClass)) {
+                NMSWorldRegistration worldRegistration = ((NMSWorldRegistration) worldRegistrationClass.newInstance());
                 Object nmsWorld = worldRegistration.getNMSWorld(loc.getWorld());
 
                 Class bikeClass = Class.forName("com.ksanur.lightbikes.nms." + packageVersion + ".bikes." + bikeType.getName());
@@ -107,8 +107,8 @@ public class BikeNMS {
         String packageVersion = getPackageVersion();
         try {
             Class<?> lightPaneClass = Class.forName("com.ksanur.lightbikes.nms." + packageVersion + ".LightPane");
-            if (NMSBlockProxy.class.isAssignableFrom(lightPaneClass)) {
-                ((NMSBlockProxy) lightPaneClass.newInstance()).hook();
+            if (NMSBlockRegistration.class.isAssignableFrom(lightPaneClass)) {
+                ((NMSBlockRegistration) lightPaneClass.newInstance()).hook();
             }
         } catch (Exception e) {
             e.printStackTrace();

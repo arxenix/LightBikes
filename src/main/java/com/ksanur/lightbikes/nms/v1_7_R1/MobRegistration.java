@@ -1,6 +1,6 @@
 package com.ksanur.lightbikes.nms.v1_7_R1;
 
-import com.ksanur.lightbikes.nms.NMSMobRegistrationProxy;
+import com.ksanur.lightbikes.nms.NMSMobRegistration;
 import net.minecraft.server.v1_7_R1.Entity;
 import net.minecraft.server.v1_7_R1.EntityTypes;
 
@@ -11,7 +11,7 @@ import java.lang.reflect.Field;
  * Date: 1/27/14
  * Time: 5:30 PM
  */
-public class MobRegistration implements NMSMobRegistrationProxy {
+public class MobRegistration implements NMSMobRegistration {
     public Field getStringToClassField() throws NoSuchFieldException {
         return EntityTypes.class.getDeclaredField("c");
     }

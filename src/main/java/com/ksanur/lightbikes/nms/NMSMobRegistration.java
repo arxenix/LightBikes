@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
  * Date: 1/27/14
  * Time: 5:29 PM
  */
-public interface NMSMobRegistrationProxy {
+public interface NMSMobRegistration {
     public Field getStringToClassField() throws NoSuchFieldException;
 
     public Field getClassToStringField() throws NoSuchFieldException;

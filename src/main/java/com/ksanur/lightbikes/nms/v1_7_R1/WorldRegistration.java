@@ -1,6 +1,6 @@
 package com.ksanur.lightbikes.nms.v1_7_R1;
 
-import com.ksanur.lightbikes.nms.NMSWorldRegistrationProxy;
+import com.ksanur.lightbikes.nms.NMSWorldRegistration;
 import net.minecraft.server.v1_7_R1.World;
 import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
 
@@ -9,7 +9,7 @@ import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
  * Date: 1/27/14
  * Time: 7:02 PM
  */
-public class WorldRegistration implements NMSWorldRegistrationProxy {
+public class WorldRegistration implements NMSWorldRegistration {
     public World getNMSWorld(org.bukkit.World world) {
         return ((CraftWorld) world).getHandle();
     }

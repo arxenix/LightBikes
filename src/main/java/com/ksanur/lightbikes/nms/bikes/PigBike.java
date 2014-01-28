@@ -6,4 +6,7 @@ package com.ksanur.lightbikes.nms.bikes;
  * Time: 8:08 PM
  */
 public interface PigBike extends Bike {
+    public boolean hasSaddle();
+
+    public void setSaddle(boolean saddle);
 }

@@ -6,4 +6,7 @@ package com.ksanur.lightbikes.nms.bikes;
  * Time: 8:10 PM
  */
 public interface OcelotBike extends Bike {
+    public int getCatType();
+
+    public void setCatType(int type);
 }

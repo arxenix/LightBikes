@@ -6,4 +6,11 @@ package com.ksanur.lightbikes.nms.bikes;
  * Time: 8:09 PM
  */
 public interface WolfBike extends Bike {
+    public boolean isTamed();
+
+    public void setTamed(boolean tamed);
+
+    public boolean isAngry();
+
+    public void setAngry(boolean angry);
 }

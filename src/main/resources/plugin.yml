@@ -3,6 +3,7 @@ main: com.ksanur.lightbikes.LightBikes
 version: ${version}
 description: LightBikes minigame
 author: bobacadodl
+depend: [SQLibrary]
 commands:
   lightbikes:
     description: LightBikes main command

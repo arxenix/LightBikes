@@ -13,18 +13,22 @@ import java.sql.SQLException;
  */
 public class LBPlayer extends LBOfflinePlayer {
     private final Player player;
-    private LBGame game;
+    private LBArena game;
 
     protected LBPlayer(Player player) {
         super(player);
         this.player = player;
     }
 
-    public void joinGame(LBGame game) {
+    public void joinGame(LBArena game) {
 
     }
 
-    public boolean isInGame(LBGame game) {
+    public Player getPlayer() {
+        return player;
+    }
+
+    public boolean isInGame(LBArena game) {
         return this.game.equals(game);
     }
 
@@ -32,7 +36,7 @@ public class LBPlayer extends LBOfflinePlayer {
         return game != null;
     }
 
-    public LBGame getGame() {
+    public LBArena getGame() {
         return game;
     }
 

@@ -2,6 +2,7 @@ package com.ksanur.lightbikes;
 
 import com.ksanur.lightbikes.nms.bikes.Bike;
 import com.ksanur.lightbikes.nms.bikes.Direction;
+import com.ksanur.lightbikes.util.SerializableLocation;
 import lib.PatPeter.SQLibrary.Database;
 import lib.PatPeter.SQLibrary.MySQL;
 import lib.PatPeter.SQLibrary.SQLite;
@@ -10,6 +11,7 @@ import mondocommand.MondoCommand;
 import mondocommand.dynamic.Sub;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -23,12 +25,13 @@ import java.util.HashMap;
  */
 public class LightBikes extends JavaPlugin {
     private static LightBikes instance;
-    private static String NAME;
+    private final static String NAME = "LightBikes";
 
     private static Database sql;
     private static DatabaseType databaseType = DatabaseType.SQLite;
 
     private static HashMap<Player, LBPlayer> players = new HashMap<Player, LBPlayer>();
+    private static HashMap<String, LBArena> arenas = new HashMap<String, LBArena>();
 
     public void onEnable() {
         instance = this;
@@ -41,12 +44,13 @@ public class LightBikes extends JavaPlugin {
         //register glass panes
         BikeNMS.hookBlocks();
 
+        ConfigurationSerialization.registerClass(SerializableLocation.class, "Location");
+        ConfigurationSerialization.registerClass(LBArena.class, "LBGame");
         //loadConfig();
 
         MondoCommand base = new MondoCommand();
         base.autoRegisterFrom(this);
         getCommand("lightbikes").setExecutor(base);
-
 
     }
 
@@ -66,11 +70,40 @@ public class LightBikes extends JavaPlugin {
         }
 
         Bike bike = BikeNMS.spawnBike(closest, call.getPlayer().getLocation());
+        call.reply("" + call.getPlayer().getLocation().getYaw());
+        call.reply(Direction.fromYaw(call.getPlayer().getLocation().getYaw()).toString());
         bike.setDirection(Direction.fromYaw(call.getPlayer().getLocation().getYaw()));
         bike.getBukkitEntity().setPassenger(call.getPlayer());
         call.reply("{GREEN}Spawned bike!");
     }
 
+    public static LBArena getArena(String name) {
+        return arenas.get(name);
+    }
+
+    public static void addArena(LBArena arena) {
+        arenas.put(arena.getName(), arena);
+    }
+
+    public static LBPlayer getLBPlayer(Player player) {
+        return players.get(player);
+    }
+
+    public static LBOfflinePlayer getOfflineLBPlayer(OfflinePlayer player) {
+        return new LBOfflinePlayer(player);
+    }
+
+    public static Database getSQL() {
+        return sql;
+    }
+
+    public static DatabaseType getDatabaseType() {
+        return databaseType;
+    }
+
+    public static LightBikes getInstance() {
+        return instance;
+    }
 
     public void loadConfig() {
         saveDefaultConfig();
@@ -161,8 +194,7 @@ public class LightBikes extends JavaPlugin {
         } else {
             getLogger().info("Database connection successful!");
         }
-        //TODO read sql data
-
+        //TODO read sql data in separate thread
         //create default tables
         switch (databaseType) {
             case MySQL:
@@ -178,26 +210,9 @@ public class LightBikes extends JavaPlugin {
                     e.printStackTrace();
                 }
                 break;
+
+            //Read arenas
+
         }
-    }
-
-    public static LBPlayer getLBPlayer(Player player) {
-        return players.get(player);
-    }
-
-    public static LBOfflinePlayer getOfflineLBPlayer(OfflinePlayer player) {
-        return new LBOfflinePlayer(player);
-    }
-
-    public static Database getSQL() {
-        return sql;
-    }
-
-    public static DatabaseType getDatabaseType() {
-        return databaseType;
-    }
-
-    public static LightBikes getInstance() {
-        return instance;
     }
 }
